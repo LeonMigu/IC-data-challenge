@@ -41,7 +41,7 @@ market_data <- read.csv(file="training_data.csv", header=TRUE, sep=",")
 #### Now you can play with data
 
 #### Variable Selection
-
+market_data_1 <- market_data[,-1] 
 require(caret)
 trans = preProcess(market_data_1[,-2001], 
                    method=c("BoxCox", "center", 
