@@ -105,7 +105,31 @@ fit <- roll_lm(as.matrix(pca_data), as.matrix(market_data$Y), width = 20 )
 ## This assumes that model name is 'fit'
 
 new.df <- read.csv(file="test_data.csv", header=TRUE, sep=",")
-z = predict(fit, newdata=new.df, interval='confidence')
+
+p<- 200
+new.df <- read.csv(file="test_data.csv", header=TRUE, sep=",")
+new.df.select <- new.df[, variables]
+z <- matrix(rep(0, times = length(new.df.select[, 1])), ncol = 3, nrow = length(new.df.select[, 1]))
+
+tmp.data <- cbind(market_data$Y[(360-p+1):360], lasso_data[(360-p+1):360, ])
+colnames(tmp.data) <- c("Y", variables)
+result <- lm(Y~., tmp.data)
+z[1, ] = predict(result, newdata = new.df.select[1, ], interval='confidence')
+
+for(i in 2:length(new.df.select[, 1]))
+{
+  tmp1 <- cbind(market_data$Y[(360-p+i):360], lasso_data[(360-p+i):360, ])
+  colnames(tmp1) <- c("Y", variables)
+  tmp2 <- cbind(z[1:(i-1), 1], new.df.select[1:(i-1), ])
+  colnames(tmp2) <- c("Y", variables)
+  
+  tmp.data <- rbind(tmp1, tmp2)
+  colnames(tmp.data) <- c("Y", variables)
+  result <- lm(Y~., tmp.data)
+  z[i, ] = predict(result, newdata = new.df.select[i, ], interval='confidence')
+}
+#z = predict(result, newdata=new.df, interval='confidence')
+colnames(z) <- c("fit", "lwr", "")
 print(z)
 
 ##### Save your prediction as CSV
