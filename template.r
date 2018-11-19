@@ -129,7 +129,7 @@ for(i in 2:length(new.df.select[, 1]))
   z[i, ] = predict(result, newdata = new.df.select[i, ], interval='confidence')
 }
 #z = predict(result, newdata=new.df, interval='confidence')
-colnames(z) <- c("fit", "lwr", "")
+colnames(z) <- c("fit", "lwr", "upr")
 print(z)
 
 ##### Save your prediction as CSV
