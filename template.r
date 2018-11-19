@@ -47,7 +47,9 @@ trans = preProcess(market_data_1[,-2001],
                    method=c("BoxCox", "center", 
                             "scale", "pca"))
 PC = predict(trans, market_data_1[,-2001])
-
+new_market_data <- cbind(market_data$TimeStamp, PC, market_data$Y)
+colnames(new_market_data)[1] = "TimeStamp"
+colnames(new_market_data)[dim(PC)[2]+2] = "Y"
 #### Assess Correlation 
 
 #### Assess change in correlation with time
