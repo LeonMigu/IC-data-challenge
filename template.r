@@ -41,10 +41,6 @@ market_data <- read.csv(file="training_data.csv", header=TRUE, sep=",")
 #### Now you can play with data
 
 #### Variable Selection
-fit_full <- lm(Y~., data = market_data)
-fit_full_box <- boxcox(Y~., data=market_data)
-market_data_1 <- market_data[,-1]
-fit_full_pca <- prcomp(market_data_1[,-2001],center = TRUE,scale. = TRUE) 
 
 require(caret)
 trans = preProcess(market_data_1[,-2001], 
