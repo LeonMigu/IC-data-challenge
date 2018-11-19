@@ -5,31 +5,31 @@
 url1 = "https://raw.githubusercontent.com/Auquan/qq-ic/master/training_data.csv"
 url2 = "https://raw.githubusercontent.com/Auquan/qq-ic/master/test_data.csv"
 if (!file.exists("training_data.csv")) {
-download.file(url1, "training_data.csv", method = "auto", quiet = FALSE, mode = "w")
+  download.file(url1, "training_data.csv", method = "auto", quiet = FALSE, mode = "w")
 }
 if (!file.exists("test_data.csv")) {
-download.file(url2, "test_data.csv", method = "auto", quiet = FALSE, mode = "w")
+  download.file(url2, "test_data.csv", method = "auto", quiet = FALSE, mode = "w")
 }
 
 checkInstall <- function(x){
-	r = getOption("repos") # hard code the UK repo for CRAN
-	r["CRAN"] = "http://cran.uk.r-project.org"
-	options(repos = r)
-	rm(r)
-  	for( i in x ){
-    	#  require returns TRUE invisibly if it was able to load package
-    	if( ! require( i , character.only = TRUE ) ){
-      		#  If package was not able to be loaded then re-install
-      		install.packages( i , dependencies = TRUE )
-      		#  Load package after installing
-      		require( i , character.only = TRUE )
-    	}
-  	}
+  r = getOption("repos") # hard code the UK repo for CRAN
+  r["CRAN"] = "http://cran.uk.r-project.org"
+  options(repos = r)
+  rm(r)
+  for( i in x ){
+    #  require returns TRUE invisibly if it was able to load package
+    if( ! require( i , character.only = TRUE ) ){
+      #  If package was not able to be loaded then re-install
+      install.packages( i , dependencies = TRUE )
+      #  Load package after installing
+      require( i , character.only = TRUE )
+    }
+  }
 }
 
 ##### FIRST MENTION ANYPACKAGES YOU WANT TO USE HERE
 
-requiredPackages <-c("reshape2" , "data.table" )
+requiredPackages <-c("reshape2" , "data.table", "MASS", "stats", "caret" )
 #  Then try/install packages...
 checkInstall( requiredPackages )
 
@@ -41,6 +41,16 @@ market_data <- read.csv(file="training_data.csv", header=TRUE, sep=",")
 #### Now you can play with data
 
 #### Variable Selection
+fit_full <- lm(Y~., data = market_data)
+fit_full_box <- boxcox(Y~., data=market_data)
+market_data_1 <- market_data[,-1]
+fit_full_pca <- prcomp(market_data_1[,-2001],center = TRUE,scale. = TRUE) 
+
+require(caret)
+trans = preProcess(market_data_1[,-2001], 
+                   method=c("BoxCox", "center", 
+                            "scale", "pca"))
+PC = predict(trans, market_data_1[,-2001])
 
 #### Assess Correlation 
 
