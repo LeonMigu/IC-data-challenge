@@ -29,7 +29,8 @@ checkInstall <- function(x){
 
 ##### FIRST MENTION ANYPACKAGES YOU WANT TO USE HERE
 
-requiredPackages <-c("reshape2" , "data.table", "MASS", "stats", "caret", "car", "elasticnet", "glmnet", "mvtnorm", "tidyverse", "dplyr")
+requiredPackages <-c("reshape2" , "data.table", "MASS", "stats", "caret", "car", "elasticnet", "glmnet",
+                     "mvtnorm", "tidyverse", "dplyr", "roll")
 #  Then try/install packages...
 checkInstall( requiredPackages )
 
@@ -58,22 +59,25 @@ variables<-row.names(c)[inds][-1]
 #Creating the data frame with the feature selection done
 lasso_data <- pre_processed_data %>% select(variables)
 
+##Doing PCA to reduce even more the dimension
 trans <- preProcess(lasso_data, 
                     method=c("pca"))
 pca_data <- predict(trans, lasso_data)
+#Data after selection
+new_market_data_2 <- cbind(market_data$TimeStamp, lasso_data, market_data$Y)
+colnames(new_market_data_2)[1] = "TimeStamp"
+colnames(new_market_data_2)[dim(pca_data)[2]+2] = "Y"
 
 new_market_data <- cbind(market_data$TimeStamp, pca_data, market_data$Y)
 colnames(new_market_data)[1] = "TimeStamp"
 colnames(new_market_data)[dim(pca_data)[2]+2] = "Y"
 
 #### Assess Correlation 
-
-fit_full_pc <- lm(Y~., data=new_market_data)
-step(fit_full_pc)
+fit <- roll_lm(as.matrix(pca_data), as.matrix(market_data$Y), width = 20 )
 #### Assess change in correlation with time
 
 #### Multi Linear regression Fitting the model
-fit = lm(F4~F1+F2+F3, data = market_data) #Create the linear regression
+#fit = lm(F4~F1+F2+F3, data = market_data) #Create the linear regression
 # summary(fit) # show results
 # Other useful functions 
 # coefficients(fit) # model coefficients
@@ -106,3 +110,4 @@ print(z)
 
 ##### Save your prediction as CSV
 write.csv(z, file = "predictions.csv",row.names=FALSE, na="")
+
